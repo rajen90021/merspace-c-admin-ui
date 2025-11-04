@@ -1,4 +1,3 @@
-
 import {
   Layout,
   Card,
@@ -9,58 +8,59 @@ import {
   Button,
   Flex,
   Alert,
-  
 } from "antd";
-import {
-  LockFilled,
-  UserOutlined,
-  LockOutlined,
-} from "@ant-design/icons";
+import { LockFilled, UserOutlined, LockOutlined } from "@ant-design/icons";
 import Logo from "../../components/icons/Logo";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { Credentials } from "../../types";
-import { login } from "../../http/api";
-import { self } from '../../http/api';
-
+import { login, logout } from "../../http/api";
+import { self } from "../../http/api";
+import { useAuthStore } from "../../store";
+import { usePermission } from "../../hooks/usePermission";
 
 const loginUser = async (credentials: Credentials) => {
-  const {data }=   await login(credentials);
+  const { data } = await login(credentials);
   return data;
 };
 
-
 const getSelfInfo = async () => {
- const {data }=   await self();
+  const { data } = await self();
   return data;
-}
+};
 
 export default function Login() {
+  const { isAllowed } = usePermission();
+  const { setUser, logout: logoutFromStore } = useAuthStore();
 
-
-const {data: selfData ,refetch}= useQuery({
-
-    queryKey: ['selfInfo'],
-    queryFn: async ()=>{
-      const {data} = await getSelfInfo();
-      return data;
-    },
+  const { refetch } = useQuery({
+    queryKey: ["selfInfo"],
+    queryFn: getSelfInfo,
     enabled: false, // disable automatic query on mount
   });
 
-  const { mutate ,isPending ,isError ,error}= useMutation({
-   
-    mutationKey: ['login'],
-    mutationFn: loginUser,
-    onSuccess: async ()=>{
-      // get self info
-      await refetch();
-      console.log("user data ",selfData);
-      // store in the state
-      console.log("Login successful");
-    }
+  const { mutate: logoutMutate } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: async () => {
+      logoutFromStore();
+      return;
+    },
   });
-
- 
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: loginUser,
+    onSuccess: async () => {
+      const selfDataPromise = await refetch();
+      // logout or redirect to client ui
+      // window.location.href = "http://clientui/url"
+      // "admin", "manager", "customer"
+      if (!isAllowed(selfDataPromise.data)) {
+        logoutMutate();
+        return;
+      }
+      setUser(selfDataPromise.data);
+    },
+  });
 
   return (
     <Layout
@@ -105,16 +105,17 @@ const {data: selfData ,refetch}= useQuery({
             layout="vertical"
             initialValues={{ remember: true }}
             onFinish={(values) => {
-                                mutate({ email: values.username, password: values.password });
-                                console.log(values);
-                            }}>
-                            {isError && (
-                                <Alert
-                                    style={{ marginBottom: 24 }}
-                                    type="error"
-                                    message={error?.message}
-                                />
-                            )}
+              mutate({ email: values.username, password: values.password });
+              console.log(values);
+            }}
+          >
+            {isError && (
+              <Alert
+                style={{ marginBottom: 24 }}
+                type="error"
+                message={error?.message}
+              />
+            )}
             {/* Username */}
             <Form.Item
               name="username"
@@ -124,10 +125,7 @@ const {data: selfData ,refetch}= useQuery({
                 { type: "email", message: "Email is not valid" },
               ]}
             >
-              <Input
-                prefix={<UserOutlined />}
-                placeholder="Enter your email"
-              />
+              <Input prefix={<UserOutlined />} placeholder="Enter your email" />
             </Form.Item>
 
             {/* Password */}
@@ -145,7 +143,11 @@ const {data: selfData ,refetch}= useQuery({
             </Form.Item>
 
             {/* Remember me + Forgot password */}
-            <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ marginBottom: 16 }}
+            >
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Remember me</Checkbox>
               </Form.Item>
