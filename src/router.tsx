@@ -1,17 +1,20 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import HomePage from "./pages/homepage";
-
 import LoginPage from "./pages/login/login";
 import Dashboard from "./layouts/Dashboard";
 import NonAuth from "./layouts/NonAuth";
 import Root from "./layouts/Root";
+import HomePage from "./pages/homepage";
+import Users from "./pages/users/Users";
+import Tenants from "./pages/tenants/Tenants";
+import Products from "./pages/products/Products";
+import Orders from "./pages/orders/Orders";
+import SingleOrders from "./pages/orders/SingleOrders";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
-
     children: [
       {
         path: "",
@@ -21,13 +24,31 @@ export const router = createBrowserRouter([
             path: "",
             element: <HomePage />,
           },
+          {
+            path: "/users",
+            element: <Users />,
+          },
+          {
+            path: "/restaurants",
+            element: <Tenants />,
+          },
+          {
+            path: "/products",
+            element: <Products />,
+          },
+          {
+            path: "/orders",
+            element: <Orders />,
+          },
+          {
+            path: "/orders/:orderId",
+            element: <SingleOrders />,
+          },
         ],
       },
-
       {
         path: "/auth",
         element: <NonAuth />,
-
         children: [
           {
             path: "login",
