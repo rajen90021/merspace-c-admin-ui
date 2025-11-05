@@ -17,6 +17,7 @@ import { useAuthStore } from '../../store';
 import React from 'react';
 import TenantFilter from './TenantFilter';
 import { createTenant, getTenants } from '../../http/api';
+import TenantForm from './forms/TenantForm';
 import type { CreateTenantData, FieldData } from '../../types';
 import { PER_PAGE } from '../../constants';
 import { debounce } from 'lodash';
@@ -185,9 +186,9 @@ const Tenants = () => {
                             </Button>
                         </Space>
                     }>
-                    {/* <Form layout="vertical" form={form}>
+                    <Form layout="vertical" form={form}>
                         <TenantForm />
-                    </Form> */}
+                    </Form>
                 </Drawer>
             </Space>
         </>
