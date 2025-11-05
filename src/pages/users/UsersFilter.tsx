@@ -10,7 +10,7 @@ const UsersFilter = ({ children }: UsersFilterProps) => {
                 <Col span={16}>
                     <Row gutter={20}>
                         <Col span={8}>
-                            <Form.Item name="search">
+                            <Form.Item name="q">
                                 <Input.Search allowClear={true} placeholder="Search" />
                             </Form.Item>
                         </Col>

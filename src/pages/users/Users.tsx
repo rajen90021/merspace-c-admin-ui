@@ -101,11 +101,7 @@ const Users = () => {
             const queryString = new URLSearchParams(
                 filteredParams as unknown as Record<string, string>
             ).toString();
-           return getUsers(queryString).then((res) => ({
-  data: res.data,
-  total: res.data.length, // or adjust based on pagination
-}));
-            
+            return getUsers(queryString).then((res) => res.data);
         },
         placeholderData: keepPreviousData,
     });
