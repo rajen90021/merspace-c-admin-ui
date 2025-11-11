@@ -33,3 +33,25 @@ export const createUser = (data: CreateUserData) => {
 export const updateUser = (data: CreateUserData, id: string) => {
     return api.patch(`${AUTH_SERVICE}/users/${id}`, data);
 };
+
+
+
+// Catelog service
+export const getCategories = () => api.get(`${CATALOG_SERVICE}/categories`);
+export const getProducts = (queryParam: string) =>  
+    api.get(`${CATALOG_SERVICE}/products?${queryParam}`);
+export const createProduct = (product: FormData) =>
+    api.post(`${CATALOG_SERVICE}/products`, product, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+export const getCategory = (id: string) => api.get(`${CATALOG_SERVICE}/categories/${id}`);
+export const updateProduct = (product: FormData, id: string) => {
+    return api.put(`${CATALOG_SERVICE}/products/${id}`, product, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+export const updateCategory = (category: FormData, id: string) => {
+    return api.put(`${CATALOG_SERVICE}/categories/${id}`, category, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
