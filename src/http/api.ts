@@ -1,10 +1,11 @@
 // auth service
 
-import type { CreateTenantData, Credentials, CreateUserData } from "../types";
+import type { CreateTenantData, Credentials, CreateUserData, OrderStatus } from "../types";
 import api from "./client";
 
 export const AUTH_SERVICE = '/api/auth';
 export const CATALOG_SERVICE = '/api/catalog';
+const ORDER_SERVICE = '/api/order';
 
 export const login = (credentials: Credentials) => {
   return api.post(`${AUTH_SERVICE}/auth/login`, credentials);
@@ -55,3 +56,11 @@ export const updateCategory = (category: FormData, id: string) => {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
 };
+
+
+// Order service
+export const getOrders = (queryString: string) => api.get(`${ORDER_SERVICE}/orders?${queryString}`);
+export const getSingle = (orderId: string, queryString: string) =>
+    api.get(`${ORDER_SERVICE}/orders/${orderId}?${queryString}`);
+export const changeStatus = (orderId: string, data: { status: OrderStatus }) =>
+    api.patch(`${ORDER_SERVICE}/orders/change-status/${orderId}`, data);
