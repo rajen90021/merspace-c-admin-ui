@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { colorMapping } from '../../constants';
 import { capitalizeFirst } from '../products/helpers';
 import React from 'react';
-// import socket from '../../lib/socket';
+import socket from '../../lib/socket';
 import { useAuthStore } from '../../store';
 
 const columns = [
@@ -105,39 +105,41 @@ const Orders = () => {
     const [messageApi, contextHolder] = message.useMessage();
 
     React.useEffect(() => {
-        // if (user?.tenant) {
-        //     socket.on('order-update', (data) => {
-        //         // todo: data.event_type =
-        //         if (
-        //             (data.event_type === OrderEvents.ORDER_CREATE &&
-        //                 data.data.paymentMode === PaymentMode.CASH) ||
-        //             (data.event_type === OrderEvents.PAYMENT_STATUS_UPDATE &&
-        //                 data.data.paymentStatus === PaymentStatus.PAID &&
-        //                 data.data.paymentMode === PaymentMode.CARD)
-        //         ) {
-        //             queryClient.setQueryData(['orders'], (old: Order[]) => [data.data, ...old]);
-        //             messageApi.open({
-        //                 type: 'success',
-        //                 content: 'New Order Received.',
-        //             });
-        //         }
+        if (user?.tenant) {
+            socket.on('order-update', (data) => {
 
-        //         console.log('data received: ', data);
-        //     });
+                console.log("coonecting to ws")
+                // todo: data.event_type =
+                if (
+                    (data.event_type === OrderEvents.ORDER_CREATE &&
+                        data.data.paymentMode === PaymentMode.CASH) ||
+                    (data.event_type === OrderEvents.PAYMENT_STATUS_UPDATE &&
+                        data.data.paymentStatus === PaymentStatus.PAID &&
+                        data.data.paymentMode === PaymentMode.CARD)
+                ) {
+                    queryClient.setQueryData(['orders'], (old: Order[]) => [data.data, ...old]);
+                    messageApi.open({
+                        type: 'success',
+                        content: 'New Order Received.',
+                    });
+                }
 
-        //     socket.on('join', (data) => {
-        //         console.log('User joined in: ', data.roomId);
-        //     });
+                console.log('data received: ', data);
+            });
 
-        //     socket.emit('join', {
-        //         tenantId: user.tenant.id,
-        //     });
-        // }
+            socket.on('join', (data) => {
+                console.log('User joined in: ', data.roomId);
+            });
 
-        // return () => {
-        //     socket.off('join');
-        //     socket.off('order-update');
-        // };
+            socket.emit('join', {
+                tenantId: user.tenant.id,
+            });
+        }
+
+        return () => {
+            socket.off('join');
+            socket.off('order-update');
+        };
     }, []);
 
     const { data: orders } = useQuery({
